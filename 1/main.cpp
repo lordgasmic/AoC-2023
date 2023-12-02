@@ -108,7 +108,7 @@ void partTwo( ) {
                 if (std::regex_search(test,match,matchWord)) {
                     numbers[numberIndex] = lookupTable( match[0]);
                     numberIndex++;
-                    test = "";
+                    test = single;
                 }
             }
 
@@ -124,7 +124,6 @@ void partTwo( ) {
 }
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
     partOne();
     partTwo();
     return 0;
