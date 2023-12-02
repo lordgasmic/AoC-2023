@@ -2,19 +2,19 @@
 #include <fstream>
 #include <vector>
 
-const int red{12};
-const int green{13};
-const int blue{14};
+const int RED{12};
+const int GREEN{13};
+const int BLUE{14};
 
 int lookupTable(std::string &color) {
     if ("red" == color) {
-        return red;
+        return RED;
     }
     if ("green" == color) {
-        return green;
+        return GREEN;
     }
     if ("blue" == color) {
-        return blue;
+        return BLUE;
     }
 
     return -1;
@@ -93,7 +93,46 @@ void partTwo() {
     if (infile.is_open()) {
         std::string str;
         while (std::getline(infile, str)) {
-
+            int colonIndex = str.find(':');
+            std::string gamesLine = str.substr(colonIndex + 2);
+            std::vector<std::string> gameVector;
+            split(gamesLine, gameVector, ';');
+            int redCubes{-1};
+            int greenCubes{-1};
+            int blueCubes{-1};
+            // check games
+            for (std::string &game: gameVector) {
+                // get count and color
+                std::vector<std::string> drawVector;
+                split(game, drawVector, ',');
+                for (std::string &draw: drawVector) {
+                    std::vector<std::string> colorVector;
+                    split(draw, colorVector);
+                    int count = std::stoi(colorVector[0]);
+                    int colorValue = lookupTable(colorVector[1]);
+                    switch (colorValue) {
+                        case RED:
+                            if (count > redCubes) {
+                                redCubes = count;
+                            }
+                            break;
+                        case GREEN:
+                            if (count > greenCubes) {
+                                greenCubes = count;
+                            }
+                            break;
+                        case BLUE:
+                            if (count > blueCubes) {
+                                blueCubes = count;
+                            }
+                            break;
+                        default:
+                            std::cout << "there was a bad color: " << colorValue << std::endl;
+                    }
+                }
+            }
+            int power = redCubes * greenCubes * blueCubes;
+            sum += power;
         }
         infile.close();
     }
