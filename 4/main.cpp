@@ -87,7 +87,7 @@ void partTwo() {
         lolsRecursion(lines, i, sum);
     }
 
-    std::cout << "part one sum is: " << sum << std::endl;
+    std::cout << "part two sum is: " << sum << std::endl;
 }
 
 int main() {
