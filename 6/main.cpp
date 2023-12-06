@@ -28,9 +28,9 @@ void partOne() {
 
         for (int j = 1; j < time; j++) {
             auto runDuration = time - j;
-            auto distanceTravled = runDuration * j;
+            auto distanceTraveled = runDuration * j;
 
-            if (distance < distanceTravled) {
+            if (distance < distanceTraveled) {
                 waysToBeat++;
             }
         }
@@ -68,7 +68,6 @@ void partTwo() {
     for (auto &dist: distanceVector) {
         totalDistance.append(dist);
     }
-
 
     long waysToBeat{0};
     long time = std::stol(totalTime);
