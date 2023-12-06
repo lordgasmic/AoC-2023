@@ -16,6 +16,16 @@ struct CategoryMap {
     long range;
 };
 
+struct SeedMap {
+    SeedMap(long start, long range) {
+        this->start = start;
+        this->range = range;
+    }
+
+    long start;
+    long range;
+};
+
 std::vector<CategoryMap*> *seedSoilMap = new std::vector<CategoryMap*>;
 std::vector<CategoryMap*> *soilFertilizerMap = new std::vector<CategoryMap*>;
 std::vector<CategoryMap*> *fertilizerWaterMap = new std::vector<CategoryMap*>;
@@ -150,8 +160,6 @@ void partOne() {
         auto seed = std::stol(s);
         auto tempVal = getLocationFromSeed(seed);
 
-        std::cout << "seed: " << seed << ", loc: " << tempVal << std::endl;
-
         if (tempVal < location) {
             location = tempVal;
         }
@@ -160,7 +168,70 @@ void partOne() {
     std::cout << "smallest location: " << location << std::endl;
 }
 
+void partTwo() {
+    std::vector<std::string> lines;
+    readFile(lines);
+
+    std::vector<std::string> seeds;
+    std::string seedLine = lines.at(0);
+    seedLine = seedLine.substr(7);
+    split(seedLine, seeds);
+
+    auto *seedMap = new std::vector<SeedMap*>;
+    for (int i = 0; i < seeds.size(); i++){
+        auto src = std::stol(seeds.at(i));
+        i++;
+        auto rng = std::stol(seeds.at(i));
+        seedMap->insert(seedMap->end(), new SeedMap(src,rng));
+    }
+
+    std::vector<CategoryMap*> *lookupMap;
+    for (int i = 2; i < lines.size(); i++) {
+        std::string line = lines.at(i);
+        if (line.empty()) {
+            continue;
+        }
+
+        std::string single = line.substr(0,1);
+        if (std::regex_match(single, match)) {
+            lookupMap = lookupTable(line);
+            std::cout << line<< std::endl;
+            continue;
+        }
+
+        std::vector<std::string> values;
+        split(line, values);
+
+        long destination = std::stol(values[0]);
+        long source = std::stol(values[1]);
+        long range = std::stol(values[2]);
+
+        auto map = new CategoryMap(destination, source, range);
+        lookupMap->insert(lookupMap->end(), map);
+    }
+
+    long location {humidityLocationMap->at(0)->destination};
+
+    for (auto & s: *seedMap) {
+        for (int i = 0; i < s->range; i++){
+            auto seed = s->start + i;
+            auto tempVal = getLocationFromSeed(seed);
+
+//            std::cout << "seed: " << seed << ", loc: " << tempVal << std::endl;
+
+            if (tempVal < location) {
+                location = tempVal;
+            }
+        }
+
+    }
+
+    std::cout << "smallest location: " << location << std::endl;
+}
+
 int main() {
-    partOne();
+//    partOne();
+    partTwo();
+
     return 0;
 }
