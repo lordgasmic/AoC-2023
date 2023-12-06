@@ -158,7 +158,7 @@ void partOne() {
 
     long location {env->getHumidityLocationMap()->begin()->first};
 
-    for (std::string s: seeds) {
+    for (const std::string& s: seeds) {
         auto seed = std::stol(s);
         auto tempVal = getLocationFromSeed(seed);
 
