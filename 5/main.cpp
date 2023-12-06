@@ -4,87 +4,81 @@
 #include <map>
 #include <regex>
 
-class Env {
-public:
-    std::string fileName{};
-    std::map<long,long> *lookupTable(std::string &line);
-    std::map<long, long>* getSeedSoilMap() {
+struct CategoryMap {
+    CategoryMap(long dest, long src, long rng) {
+        this->destination = dest;
+        this->source = src;
+        this->range = rng;
+    }
+
+    long destination;
+    long source;
+    long range;
+};
+
+std::vector<CategoryMap*> *seedSoilMap = new std::vector<CategoryMap*>;
+std::vector<CategoryMap*> *soilFertilizerMap = new std::vector<CategoryMap*>;
+std::vector<CategoryMap*> *fertilizerWaterMap = new std::vector<CategoryMap*>;
+std::vector<CategoryMap*> *waterLightMap = new std::vector<CategoryMap*>;
+std::vector<CategoryMap*> *lightTemperatureMap = new std::vector<CategoryMap*>;
+std::vector<CategoryMap*> *temperatureHumidityMap = new std::vector<CategoryMap*>;
+std::vector<CategoryMap*> *humidityLocationMap = new std::vector<CategoryMap*>;
+
+std::vector<CategoryMap*> * lookupTable(std::string &line) {
+    if ("seed-to-soil map:" == line) {
         return seedSoilMap;
     }
-    std::map<long, long>* getSoilFertilizerMap() {
-        return soilFertilizerMap;
+    if ("soil-to-fertilizer map:" == line) {
+        return  soilFertilizerMap;
     }
-    std::map<long, long>* getFertilizerWaterMap() {
+    if ("fertilizer-to-water map:" == line) {
         return fertilizerWaterMap;
     }
-    std::map<long, long>* getWaterLightMap() {
+    if ("water-to-light map:" == line) {
         return waterLightMap;
     }
-    std::map<long, long>* getLightTemperatureMap() {
+    if ("light-to-temperature map:" == line) {
         return lightTemperatureMap;
     }
-    std::map<long, long>* getTemperatureHumidityMap() {
+    if ("temperature-to-humidity map:" == line) {
         return temperatureHumidityMap;
     }
-    std::map<long, long>* getHumidityLocationMap() {
+    if ("humidity-to-location map:" == line) {
         return humidityLocationMap;
     }
-private:
-    std::map<long, long> *seedSoilMap = new std::map<long,long>();
-    std::map<long, long> *soilFertilizerMap= new std::map<long,long>();
-    std::map<long, long> *fertilizerWaterMap= new std::map<long,long>();
-    std::map<long, long> *waterLightMap= new std::map<long,long>();
-    std::map<long, long> *lightTemperatureMap= new std::map<long,long>();
-    std::map<long, long> *temperatureHumidityMap= new std::map<long,long>();
-    std::map<long, long> *humidityLocationMap= new std::map<long,long>();
-};
+
+    return nullptr;
+}
 
 std::regex match {"[stlhwf]"};
 
-Env *env = new Env();
-//Env env {"/home/lordgasmic/workspace/AoC-2023/5/input.txt"};
+struct Env {
+    std::string fileName{};
+};
 
-std::map<long,long>* Env::lookupTable(std::string &line) {
-    if ("seed-to-soil map:" == line) {
-        return this->seedSoilMap;
-    }
-    if ("soil-to-fertilizer map:" == line) {
-        return  this->soilFertilizerMap;
-    }
-    if ("fertilizer-to-water map:" == line) {
-        return this->fertilizerWaterMap;
-    }
-    if ("water-to-light map:" == line) {
-        return this->waterLightMap;
-    }
-    if ("light-to-temperature map:" == line) {
-        return this->lightTemperatureMap;
-    }
-    if ("temperature-to-humidity map:" == line) {
-        return this->temperatureHumidityMap;
-    }
-    if ("humidity-to-location map:" == line) {
-        return this->humidityLocationMap;
-    }
-}
+//Env env {"/home/lordgasmic/workspace/AoC-2023/5/input.test.txt"};
+Env env {"/home/lordgasmic/workspace/AoC-2023/5/input.txt"};
 
-long getValueOrElse(std::map<long,long> *map, long key) {
-    if (map->find(key) == map->end()){
-        return key;
+long getValueOrElse(std::vector<CategoryMap*> *categoryMap, long sourceKey) {
+    for (auto map : *categoryMap) {
+        long upperRange = map->source + map->range - 1;
+        if (map->source <= sourceKey && sourceKey <= upperRange) {
+            auto temp = sourceKey - map->source;
+            return map->destination + temp;
+        }
     }
-    else {
-        return map->at(key);
-    }
+
+    return sourceKey;
 }
 
 long getLocationFromSeed(long &seed) {
-    auto chain = getValueOrElse(env->getSeedSoilMap(), seed);
-    chain = getValueOrElse(env->getSoilFertilizerMap(), chain);
-    chain = getValueOrElse(env->getFertilizerWaterMap(), chain);
-    chain = getValueOrElse(env->getWaterLightMap(), chain);
-    chain = getValueOrElse(env->getLightTemperatureMap(), chain);
-    chain = getValueOrElse(env->getTemperatureHumidityMap(), chain);
-    return getValueOrElse(env->getHumidityLocationMap(), chain);
+    auto chain = getValueOrElse(seedSoilMap, seed);
+    chain = getValueOrElse(soilFertilizerMap, chain);
+    chain = getValueOrElse(fertilizerWaterMap, chain);
+    chain = getValueOrElse(waterLightMap, chain);
+    chain = getValueOrElse(lightTemperatureMap, chain);
+    chain = getValueOrElse(temperatureHumidityMap, chain);
+    return getValueOrElse(humidityLocationMap, chain);
 }
 
 void split(std::string &string, std::vector<std::string> &vector, const char token = ' ') {
@@ -104,9 +98,9 @@ void split(std::string &string, std::vector<std::string> &vector, const char tok
     vector.insert(vector.end(), accumulator);
 }
 
-void readFile(std::vector<std::string> &lines, Env *env) {
+void readFile(std::vector<std::string> &lines) {
     std::ifstream infile;
-    infile.open(env->fileName);
+    infile.open(env.fileName);
     if (infile.is_open()) {
         std::string str;
         while (std::getline(infile, str)) {
@@ -117,18 +111,15 @@ void readFile(std::vector<std::string> &lines, Env *env) {
 }
 
 void partOne() {
-//    env->fileName = "/home/lordgasmic/workspace/AoC-2023/5/input.test.txt";
-    env->fileName = "/home/lordgasmic/workspace/AoC-2023/5/input.txt";
-
     std::vector<std::string> lines;
-    readFile(lines, env);
+    readFile(lines);
 
     std::vector<std::string> seeds;
     std::string seedLine = lines.at(0);
     seedLine = seedLine.substr(7);
     split(seedLine, seeds);
 
-    std::map<long, long> *lookupMap;
+    std::vector<CategoryMap*> *lookupMap;
     for (int i = 2; i < lines.size(); i++) {
         std::string line = lines.at(i);
         if (line.empty()) {
@@ -137,7 +128,7 @@ void partOne() {
 
         std::string single = line.substr(0,1);
         if (std::regex_match(single, match)) {
-            lookupMap = env->lookupTable(line );
+            lookupMap = lookupTable(line);
             std::cout << line<< std::endl;
             continue;
         }
@@ -149,14 +140,11 @@ void partOne() {
         long source = std::stol(values[1]);
         long range = std::stol(values[2]);
 
-        for (long j = 0; j < range; j++){
-            lookupMap->insert(std::pair<long,long>(source, destination));
-            source++;
-            destination++;
-        }
+        auto map = new CategoryMap(destination, source, range);
+        lookupMap->insert(lookupMap->end(), map);
     }
 
-    long location {env->getHumidityLocationMap()->begin()->first};
+    long location {humidityLocationMap->at(0)->destination};
 
     for (const std::string& s: seeds) {
         auto seed = std::stol(s);
