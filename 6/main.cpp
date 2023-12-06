@@ -5,8 +5,8 @@ struct Env {
     std::string fileName;
 };
 
-Env env {"/home/lordgasmic/workspace/AoC-2023/6/input.test.txt"};
-//Env env {"/home/lordgasmic/workspace/AoC-2023/6/input.txt"};
+//Env env {"/home/lordgasmic/workspace/AoC-2023/6/input.test.txt"};
+Env env {"/home/lordgasmic/workspace/AoC-2023/6/input.txt"};
 
 void partOne() {
     std::vector<std::string> lines;
@@ -59,10 +59,22 @@ void partTwo() {
     lordgasmic::split(times, timeVector);
     lordgasmic::split(distances, distanceVector);
 
-    for (int i = 0; i < timeVector.size(); i++){
-        int waysToBeat{0};
-        int time = std::stoi(timeVector.at(i));
-        int distance = std::stoi(distanceVector.at(i));
+    std::string totalTime;
+    for (auto &str : timeVector){
+        totalTime.append(str);
+    }
+
+    std::string totalDistance;
+    for (auto &dist : distanceVector) {
+        totalDistance.append(dist);
+    }
+
+
+
+
+        long waysToBeat{0};
+        long time = std::stol(totalTime);
+        long distance = std::stol(totalDistance);
 
         for (int j = 1; j < time; j++){
             auto runDuration = time - j;
@@ -73,18 +85,13 @@ void partTwo() {
             }
         }
 
-        if (sum == 0) {
             sum = waysToBeat;
-        }
-        else {
-            sum = sum*waysToBeat;
-        }
-    }
 
     std::cout << "margin of error: " << sum << std::endl;
 }
 
 int main() {
     partOne();
+    partTwo();
     return 0;
 }
