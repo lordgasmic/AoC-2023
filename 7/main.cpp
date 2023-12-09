@@ -14,7 +14,7 @@ enum HandType {
 };
 
 enum CardType {
-   two,three,four,five,six,seven,eight,nine, T, J, Q, K, A
+    J, two, three, four, five, six, seven, eight, nine, T, Q, K, A
 };
 
 static std::unordered_map<char, CardType> const cardTable = {
@@ -40,7 +40,7 @@ struct Hand {
 
     bool operator<(const Hand &h) const {
         if (handType == h.handType) {
-            for (int i = 0; i < 5; i++){
+            for (int i = 0; i < 5; i++) {
                 if (hand.at(i) == h.hand.at(i)) {
                     continue;
                 }
@@ -60,6 +60,7 @@ struct Hand {
 
 HandType parseHand(std::string &hand) {
     std::map<char, int> handMap;
+    int jacks{0};
     for (char c: hand) {
         int i{0};
         if (handMap.count(c)) {
@@ -67,6 +68,10 @@ HandType parseHand(std::string &hand) {
         }
         i++;
         handMap[c] = i;
+
+        if (c == 'J') {
+            jacks++;
+        }
     }
 
     if (handMap.size() == 1) {
@@ -74,37 +79,56 @@ HandType parseHand(std::string &hand) {
     }
 
     if (handMap.size() == 5) {
+        if (jacks > 0) {
+            return pair;
+        }
         return high;
     }
 
     if (handMap.size() == 4) {
+        if (jacks > 0) {
+            return threeOfAKind;
+        }
         return pair;
     }
 
     for (auto it = handMap.begin(); it != handMap.end(); ++it) {
         if (it->second == 4) {
+            if (jacks > 0) {
+                return fiveOfAKind;
+            }
             return fourOfAKind;
         }
         if (it->second == 3 && handMap.size() == 3) {
+            if (jacks > 0) {
+                return fourOfAKind;
+            }
             return threeOfAKind;
         }
         if (it->second == 2 && handMap.size() == 3) {
+            if (jacks == 1) {
+                return full;
+            }
+            if (jacks == 2) {
+                return fourOfAKind;
+            }
             return twoPair;
         }
         if (it->second == 3 && handMap.size() == 2) {
+            if (jacks > 0) {
+                return fiveOfAKind;
+            }
             return full;
         }
     }
 }
-
-
 
 struct Env {
     std::string fileName;
 };
 
 //Env env{"/home/lordgasmic/workspace/AoC-2023/7/input.test.txt"};
-Env env {"/home/lordgasmic/workspace/AoC-2023/7/input.txt"};
+Env env{"/home/lordgasmic/workspace/AoC-2023/7/input.txt"};
 
 void partOne() {
     std::vector<std::string> lines;
@@ -127,7 +151,7 @@ void partOne() {
 
     long sum{0};
     int i{1};
-    for (Hand *h : hands) {
+    for (Hand *h: hands) {
         sum += (h->bet * i);
         i++;
     }
@@ -156,7 +180,7 @@ void partTwo() {
 
     long sum{0};
     int i{1};
-    for (Hand *h : hands) {
+    for (Hand *h: hands) {
         sum += (h->bet * i);
         i++;
     }
@@ -166,6 +190,6 @@ void partTwo() {
 
 int main() {
     partOne();
-    partTwo()
+    partTwo();
     return 0;
 }
