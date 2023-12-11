@@ -6,7 +6,7 @@ enum PipeType {
 };
 
 enum Direction {
-    left, right, up, down
+   center, left, right, up, down
 };
 
 PipeType lookupTable(std::string &string) {
@@ -140,11 +140,11 @@ Direction updateCourse(PipeType current, Direction heading){
         return right;
     }
 
-    if (current == ne && heading == right) {
-        return down;
+    if (current == ne && heading == left) {
+        return up;
     }
-    if (current == ne && heading == up) {
-        return left;
+    if (current == ne && heading == down) {
+        return right;
     }
 
     if (current == nw && heading == down) {
@@ -168,7 +168,7 @@ Direction updateCourse(PipeType current, Direction heading){
         return right;
     }
 
-    throw std::invalid_argument("Current PipeType not valid");
+    return center;
 }
 
 struct Env {
@@ -383,12 +383,13 @@ void partOne() {
         if (course == down) {
               nextTile = currentTile->bottom;
         }
-        course = updateCourse(currentTile->pipeType, course);
         currentTile = nextTile;
+        course = updateCourse(currentTile->pipeType, course);
         sum++;
     } while (currentTile->pipeType != starting);
 
-    std::cout << "sum: " << sum << std::endl;
+    int longestPath = sum/2;
+    std::cout << "longestPath: " << longestPath << std::endl;
 }
 
 int main() {
