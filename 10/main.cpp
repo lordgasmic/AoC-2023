@@ -44,6 +44,8 @@ struct Tile {
     Tile *bottom{nullptr};
     Tile *left{nullptr};
     Tile *right{nullptr};
+    int x;
+    int y;
 
     explicit Tile(PipeType pipeType) {
         this->pipeType = pipeType;
@@ -173,13 +175,16 @@ Direction updateCourse(PipeType current, Direction heading){
 
 struct Env {
     std::string fileName;
-    int rowCol;
+    int row;
+    int col;
     Direction startingMove;
 };
 
-Env env{"/home/lordgasmic/workspace/AoC-2023/10/input-1.test.txt", 5, right};
+//Env env{"/home/lordgasmic/workspace/AoC-2023/10/input.p2-1.test.txt", 11, 9, right};
+//Env env{"/home/lordgasmic/workspace/AoC-2023/10/input.p2-2.test.txt", 20, 10, down};
+//Env env{"/home/lordgasmic/workspace/AoC-2023/10/input.p2-3.test.txt", 20, 10, down};
 //Env env{"/home/lordgasmic/workspace/AoC-2023/10/input-2.test.txt", 5, right};
-//Env env{"/home/lordgasmic/workspace/AoC-2023/10/input.txt",140, right};
+Env env{"/home/lordgasmic/workspace/AoC-2023/10/input.txt",140, 140, right};
 
 void partOne() {
     std::vector<std::string> lines;
@@ -199,8 +204,8 @@ void partOne() {
     // find neighbors
     int startingI{-1};
     int startingJ{-1};
-    for (int i = 0; i < env.rowCol; i++) {
-        for (int j = 0; j < env.rowCol; j++) {
+    for (int i = 0; i < env.col; i++) {
+        for (int j = 0; j < env.row; j++) {
             auto tile = tiles[i][j];
 
             Tile *tTile;
@@ -217,7 +222,7 @@ void partOne() {
                             tTile = nullptr;
                         }
                     }
-                    if (i + 1 < env.rowCol) {
+                    if (i + 1 < env.col) {
                         bTile = tiles[i + 1][j];
                         if (!isConnected(tile->pipeType, bTile->pipeType, down)) {
                             bTile = nullptr;
@@ -235,7 +240,7 @@ void partOne() {
                             lTile = nullptr;
                         }
                     }
-                    if (j + 1 < env.rowCol) {
+                    if (j + 1 < env.row) {
                         rTile = tiles[i][j + 1];
                         if (!isConnected(tile->pipeType, rTile->pipeType, right)) {
                             rTile = nullptr;
@@ -253,7 +258,7 @@ void partOne() {
                             tTile = nullptr;
                         }
                     }
-                    if (j + 1 < env.rowCol) {
+                    if (j + 1 < env.row) {
                         rTile = tiles[i][j + 1];
                         if (!isConnected(tile->pipeType, rTile->pipeType, right)) {
                             rTile = nullptr;
@@ -283,13 +288,13 @@ void partOne() {
                 case se:
                     bTile = nullptr;
                     rTile = nullptr;
-                    if (i + 1 < env.rowCol) {
+                    if (i + 1 < env.col) {
                         bTile = tiles[i + 1][j];
                         if (!isConnected(tile->pipeType, bTile->pipeType, down)) {
                             bTile = nullptr;
                         }
                     }
-                    if (j + 1 < env.rowCol) {
+                    if (j + 1 < env.row) {
                         rTile = tiles[i][j + 1];
                         if (!isConnected(tile->pipeType, rTile->pipeType, right)) {
                             rTile = nullptr;
@@ -301,7 +306,7 @@ void partOne() {
                 case sw:
                     bTile = nullptr;
                     lTile = nullptr;
-                    if (i + 1 < env.rowCol) {
+                    if (i + 1 < env.col) {
                         bTile = tiles[i + 1][j];
                         if (!isConnected(tile->pipeType, bTile->pipeType, down)) {
                             bTile = nullptr;
@@ -333,7 +338,7 @@ void partOne() {
                             tTile = nullptr;
                         }
                     }
-                    if (i + 1 < env.rowCol) {
+                    if (i + 1 < env.col) {
                         bTile = tiles[i + 1][j];
                         if (!isConnected(tile->pipeType, bTile->pipeType, down)) {
                             bTile = nullptr;
@@ -345,7 +350,7 @@ void partOne() {
                             lTile = nullptr;
                         }
                     }
-                    if (j + 1 < env.rowCol) {
+                    if (j + 1 < env.row) {
                         rTile = tiles[i][j + 1];
                         if (!isConnected(tile->pipeType, rTile->pipeType, right)) {
                             rTile = nullptr;
@@ -392,7 +397,236 @@ void partOne() {
     std::cout << "longestPath: " << longestPath << std::endl;
 }
 
+void partTwo() {
+    std::vector<std::string> lines;
+    lordgasmic::readFile(env.fileName, lines);
+
+    std::vector<std::vector<Tile *>> tiles;
+    for (const std::string &line: lines) {
+        std::vector<Tile *> tileLine;
+        for (int i = 0; i < line.length(); i++) {
+            auto c = line.substr(i, 1);
+            PipeType pipeType = lookupTable(c);
+            tileLine.push_back(new Tile(pipeType));
+        }
+        tiles.push_back(tileLine);
+    }
+
+    // find neighbors
+    int startingI{-1};
+    int startingJ{-1};
+    for (int i = 0; i < env.col; i++) {
+        for (int j = 0; j < env.row; j++) {
+            auto tile = tiles[i][j];
+            tile->x = j;
+            tile->y = i;
+
+            Tile *tTile;
+            Tile *bTile;
+            Tile *lTile;
+            Tile *rTile;
+            switch (tile->pipeType) {
+                case vertical:
+                    tTile = nullptr;
+                    bTile = nullptr;
+                    if (i > 0) {
+                        tTile = tiles[i - 1][j];
+                        if (!isConnected(tile->pipeType, tTile->pipeType, up)) {
+                            tTile = nullptr;
+                        }
+                    }
+                    if (i + 1 < env.col) {
+                        bTile = tiles[i + 1][j];
+                        if (!isConnected(tile->pipeType, bTile->pipeType, down)) {
+                            bTile = nullptr;
+                        }
+                    }
+                    tile->top = tTile;
+                    tile->bottom = bTile;
+                    break;
+                case horizontal:
+                    lTile = nullptr;
+                    rTile = nullptr;
+                    if (j > 0) {
+                        lTile = tiles[i][j - 1];
+                        if (!isConnected(tile->pipeType, lTile->pipeType, left)) {
+                            lTile = nullptr;
+                        }
+                    }
+                    if (j + 1 < env.row) {
+                        rTile = tiles[i][j + 1];
+                        if (!isConnected(tile->pipeType, rTile->pipeType, right)) {
+                            rTile = nullptr;
+                        }
+                    }
+                    tile->left = lTile;
+                    tile->right = rTile;
+                    break;
+                case ne:
+                    tTile = nullptr;
+                    rTile = nullptr;
+                    if (i > 0) {
+                        tTile = tiles[i - 1][j];
+                        if (!isConnected(tile->pipeType, tTile->pipeType, up)) {
+                            tTile = nullptr;
+                        }
+                    }
+                    if (j + 1 < env.row) {
+                        rTile = tiles[i][j + 1];
+                        if (!isConnected(tile->pipeType, rTile->pipeType, right)) {
+                            rTile = nullptr;
+                        }
+                    }
+                    tile->top = tTile;
+                    tile->right = rTile;
+                    break;
+                case nw:
+                    tTile = nullptr;
+                    lTile = nullptr;
+                    if (i > 0) {
+                        tTile = tiles[i - 1][j];
+                        if (!isConnected(tile->pipeType, tTile->pipeType, up)) {
+                            tTile = nullptr;
+                        }
+                    }
+                    if (j > 0) {
+                        lTile = tiles[i][j - 1];
+                        if (!isConnected(tile->pipeType, lTile->pipeType, left)) {
+                            lTile = nullptr;
+                        }
+                    }
+                    tile->top = tTile;
+                    tile->left = lTile;
+                    break;
+                case se:
+                    bTile = nullptr;
+                    rTile = nullptr;
+                    if (i + 1 < env.col) {
+                        bTile = tiles[i + 1][j];
+                        if (!isConnected(tile->pipeType, bTile->pipeType, down)) {
+                            bTile = nullptr;
+                        }
+                    }
+                    if (j + 1 < env.row) {
+                        rTile = tiles[i][j + 1];
+                        if (!isConnected(tile->pipeType, rTile->pipeType, right)) {
+                            rTile = nullptr;
+                        }
+                    }
+                    tile->bottom = bTile;
+                    tile->right = rTile;
+                    break;
+                case sw:
+                    bTile = nullptr;
+                    lTile = nullptr;
+                    if (i + 1 < env.col) {
+                        bTile = tiles[i + 1][j];
+                        if (!isConnected(tile->pipeType, bTile->pipeType, down)) {
+                            bTile = nullptr;
+                        }
+                    }
+                    if (j > 0) {
+                        lTile = tiles[i][j - 1];
+                        if (!isConnected(tile->pipeType, lTile->pipeType, left)) {
+                            lTile = nullptr;
+                        }
+                    }
+                    tile->bottom = bTile;
+                    tile->left = lTile;
+                    break;
+                case ground:
+                    // nothing to do
+                    break;
+                case starting:
+                    startingI = i;
+                    startingJ = j;
+                    tTile = nullptr;
+                    bTile = nullptr;
+                    rTile = nullptr;
+                    lTile = nullptr;
+
+                    if (i > 0) {
+                        tTile = tiles[i - 1][j];
+                        if (!isConnected(tile->pipeType, tTile->pipeType, up)) {
+                            tTile = nullptr;
+                        }
+                    }
+                    if (i + 1 < env.col) {
+                        bTile = tiles[i + 1][j];
+                        if (!isConnected(tile->pipeType, bTile->pipeType, down)) {
+                            bTile = nullptr;
+                        }
+                    }
+                    if (j > 0) {
+                        lTile = tiles[i][j - 1];
+                        if (!isConnected(tile->pipeType, lTile->pipeType, left)) {
+                            lTile = nullptr;
+                        }
+                    }
+                    if (j + 1 < env.row) {
+                        rTile = tiles[i][j + 1];
+                        if (!isConnected(tile->pipeType, rTile->pipeType, right)) {
+                            rTile = nullptr;
+                        }
+                    }
+                    tile->top = tTile;
+                    tile->bottom = bTile;
+                    tile->right = rTile;
+                    tile->left = lTile;
+                    break;
+                case null:
+                default:
+                    std::cout << "Error reading pipe type: [" << i << ", " << j << "]" << std::endl;
+                    return;
+            }
+        }
+    }
+
+    // find starting loc neighbors
+    auto currentTile = tiles[startingI][startingJ];
+    int sum{0};
+    long p{0};
+    auto course = env.startingMove;
+    do {
+        Tile *nextTile = nullptr;
+        if (course == right) {
+              nextTile = currentTile->right;
+        }
+        if (course == left) {
+              nextTile = currentTile->left;
+        }
+        if (course == up) {
+              nextTile = currentTile->top;
+        }
+        if (course == down) {
+              nextTile = currentTile->bottom;
+        }
+
+        long x1 = currentTile->x;
+        long y1 = currentTile->y;
+        long x2 = nextTile->x;
+        long y2 = nextTile->y;
+
+        long m1 = x1 * y2;
+        long m2 = x2 * y1;
+        p += m1 - m2;
+
+        currentTile = nextTile;
+        course = updateCourse(currentTile->pipeType, course);
+        sum++;
+    } while (currentTile->pipeType != starting);
+
+    int longestPath = sum/2;
+    long a = p/2;
+    std::cout << "longestPath: " << longestPath << std::endl;
+    std::cout << "area: " << a << std::endl;
+    // a + 1 - b/2 = i
+    long pick = a + 1 - longestPath;
+    std::cout << "picks: " << pick << std::endl;
+}
+
 int main() {
-    partOne();
+//    partOne();
+    partTwo();
     return 0;
 }
